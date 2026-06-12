@@ -28,6 +28,7 @@ const STATUS_COLOR: Record<string, string> = {
 interface MyReportsProps {
   onBack: () => void;
   onNewReport: () => void;
+  reports: Report[]; 
 }
 
 export default function MyReports({ onBack, onNewReport }: MyReportsProps) {

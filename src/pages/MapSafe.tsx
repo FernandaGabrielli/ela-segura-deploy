@@ -28,7 +28,7 @@ function ChangeMapCenter({ center }: { center: [number, number] }) {
   return null;
 }
 
-export default function MapSafe({ onMenu, onEmergency, onCheckIn, onProfile }: MapSafeProps) {
+export default function MapSafe({ onMenu, onEmergency, onCheckIn, onProfile: _onProfile }: MapSafeProps) {
   // Centro inicial padrão (Boa Viagem, Recife)
   const [userLocation, setUserLocation] = useState<[number, number]>([-8.1146, -34.9004]);
   const [denuncias, setDenuncias] = useState<DenunciaData[]>([]);
@@ -68,7 +68,7 @@ export default function MapSafe({ onMenu, onEmergency, onCheckIn, onProfile }: M
         const denunciasLocais = JSON.parse(locaisSalvos);
         
         // Mapeia e garante que pins locais sem coordenadas fixas apareçam próximos à usuária
-        const normaisLocais = denunciasLocales.map((d: any) => ({
+        const normaisLocais = denunciasLocais.map((d: any) => ({
           id: d.id,
           tipo: d.tipo,
           bairro: d.bairro,

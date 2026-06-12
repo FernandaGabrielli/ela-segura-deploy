@@ -1,4 +1,3 @@
-import { ShieldCheck } from "lucide-react";
 import backgroundImage from "../components/background.png";
 // CORREÇÃO: Importando a logo do mesmo diretório de componentes
 import logoImage from "../components/logo.png";

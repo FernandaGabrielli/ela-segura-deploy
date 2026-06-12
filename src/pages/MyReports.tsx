@@ -1,37 +1,105 @@
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 
-interface Report {
-  id: number;
-  type: string;
-  location: string;
-  description: string;
+interface Denuncia {
+  id: string;
+  tipo: string;
+  bairro: string;
+  cidade?: string;
+  status: string;
+  descricao: string;
+  criado_em: string;
 }
+
+const STATUS_LABEL: Record<string, string> = {
+  pendente: "Pendente",
+  em_analise: "Em análise",
+  resolvido: "Resolvido",
+  arquivado: "Arquivado",
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  pendente: "bg-yellow-100 text-yellow-600",
+  em_analise: "bg-blue-100 text-blue-600",
+  resolvido: "bg-green-100 text-green-600",
+  arquivado: "bg-gray-100 text-gray-500",
+};
 
 interface MyReportsProps {
   onBack: () => void;
   onNewReport: () => void;
-  reports: Report[];
 }
 
-// CORREÇÃO AQUI: Adicionado ", reports" dentro das chaves para receber a propriedade
-export default function MyReports({
-  onBack,
-  onNewReport,
-  reports, 
-}: MyReportsProps) {
+export default function MyReports({ onBack, onNewReport }: MyReportsProps) {
+  const [reports, setReports] = useState<Denuncia[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [erro] = useState("");
+
+  // Carrega os dados estáticos base unificados com o histórico salvo no localStorage
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const pontosSeed: Denuncia[] = [
+        {
+          id: "rep-1",
+          tipo: "assedio",
+          bairro: "Boa Viagem",
+          cidade: "Recife",
+          status: "pendente",
+          descricao: "Assédio verbal próximo à Av. Conselheiro Aguiar.",
+          criado_em: new Date().toISOString()
+        },
+        {
+          id: "rep-2",
+          tipo: "perseguicao",
+          bairro: "Sítio Histórico",
+          cidade: "Olinda",
+          status: "em_analise",
+          descricao: "Importunação em via pública perto da Sé.",
+          criado_em: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: "rep-3",
+          tipo: "violencia_fisica",
+          bairro: "Prazeres",
+          cidade: "Jaboatão",
+          status: "resolvido",
+          descricao: "Roubo de celular seguido de empurrão nas proximidades do comércio.",
+          criado_em: new Date(Date.now() - 172800000).toISOString()
+        }
+      ];
+
+      // Busca dados criados dinamicamente no armazenamento local
+      const locaisSalvos = localStorage.getItem("mock_denuncias");
+      if (locaisSalvos) {
+        try {
+          const denunciasLocais: Denuncia[] = JSON.parse(locaisSalvos);
+          
+          // Combina as denúncias criadas localmente no início do array com a base
+          setReports([...denunciasLocais, ...pontosSeed]);
+        } catch (e) {
+          setReports(pontosSeed);
+        }
+      } else {
+        setReports(pontosSeed);
+      }
+
+      setLoading(false);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="w-full h-screen bg-[#fafafa] flex flex-col">
       <div className="px-5 py-6 flex-1 overflow-y-auto">
         <button
           onClick={onBack}
-          className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center mb-6 bg-white active:scale-95 transition-transform"
+          className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center mb-6 bg-white active:scale-95 transition-transform"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={20} className="text-gray-600" />
         </button>
 
-        <h1 className="text-2xl font-bold text-[#5d5fef] mb-6">
-          Minhas Ocorrências
-        </h1>
+        <h1 className="text-2xl font-bold text-[#5d5fef] mb-6">Minhas Ocorrências</h1>
 
         <button
           onClick={onNewReport}
@@ -40,46 +108,45 @@ export default function MyReports({
           Registrar Nova Ocorrência
         </button>
 
+        {loading && (
+          <p className="text-center text-gray-400 py-8 animate-pulse">Carregando...</p>
+        )}
+
+        {erro && (
+          <p className="text-center text-red-500 py-4">{erro}</p>
+        )}
+
         <div className="space-y-4">
-          {reports.length === 0 ? (
+          {!loading && reports.length === 0 && !erro && (
             <div className="bg-white p-6 rounded-xl text-center text-gray-400 border border-gray-100">
               Nenhuma ocorrência registrada.
             </div>
-          ) : (
-            reports.map((report) => (
-              <ReportCard
-                key={report.id}
-                type={report.type}
-                location={report.location}
-              />
-            ))
           )}
+
+          {reports.map((r) => (
+            <div key={r.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs bg-pink-100 text-pink-500 px-3 py-1 rounded-full font-medium capitalize">
+                  {r.tipo.replace("_", " ")}
+                </span>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLOR[r.status] ?? "bg-gray-100 text-gray-500"}`}>
+                  {STATUS_LABEL[r.status] ?? r.status}
+                </span>
+              </div>
+
+              {r.bairro && (
+                <h2 className="font-semibold text-gray-700 mt-2">{r.bairro}{r.cidade ? `, ${r.cidade}` : ""}</h2>
+              )}
+
+              <p className="text-sm text-gray-400 mt-1 line-clamp-2">{r.descricao}</p>
+
+              <p className="text-xs text-gray-300 mt-2">
+                {new Date(r.criado_em).toLocaleDateString("pt-BR")}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-function ReportCard({
-  type,
-  location,
-}: {
-  type: string;
-  location: string;
-}) {
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-      <span className="text-xs bg-pink-100 text-pink-500 px-3 py-1 rounded-full font-medium">
-        {type}
-      </span>
-
-      <h2 className="font-semibold text-gray-700 mt-3">
-        {location}
-      </h2>
-
-      <p className="text-sm text-gray-400 mt-2">
-        Ocorrência registrada recentemente.
-      </p>
     </div>
   );
 }

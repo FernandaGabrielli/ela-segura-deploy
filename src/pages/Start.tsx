@@ -1,4 +1,7 @@
 import { ShieldCheck } from "lucide-react";
+import backgroundImage from "../components/background.png";
+// CORREÇÃO: Importando a logo do mesmo diretório de componentes
+import logoImage from "../components/logo.png";
 
 interface StartProps {
   onLogin: () => void;
@@ -10,7 +13,7 @@ export function Start({ onLogin, onRegister }: StartProps) {
     <div className="w-full h-screen bg-white overflow-hidden relative">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1200&auto=format&fit=crop"
+          src={backgroundImage}
           alt="background"
           className="w-full h-full object-cover"
         />
@@ -18,14 +21,14 @@ export function Start({ onLogin, onRegister }: StartProps) {
       </div>
 
       <div className="relative z-10 h-full flex flex-col justify-end items-center px-6 pb-14">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="border-2 border-white rounded-2xl p-3">
-            <ShieldCheck className="text-white w-10 h-10" />
-          </div>
-          <div className="text-white leading-none">
-            <h1 className="text-4xl font-semibold">Ela</h1>
-            <h1 className="text-4xl font-semibold">Segura</h1>
-          </div>
+        
+        {/* Bloco da Logo Centralizada e Enquadrada */}
+        <div className="flex items-center justify-center mb-10 w-full max-w-[240px]">
+          <img 
+            src={logoImage} 
+            alt="Ela Segura Logo" 
+            className="w-full h-auto object-contain"
+          />
         </div>
 
         <button
